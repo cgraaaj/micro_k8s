@@ -1,0 +1,35 @@
+---
+# tasks file for configure_micro_k8s
+- name: Get master node join url
+  shell: sudo microk8s.add-node
+  register: microk8s_add_node_sout
+
+- name: Set master node url/token
+  set_fact:
+    microk8s_add_node_url: "{{ microk8s_add_node_sout.stdout | regex_search('192.*')}}"
+  when: "'masters' in group_names"
+
+- name: Output microk8s_add_node_url variable
+  debug:
+    var: microk8s_add_node_url
+  when: "'masters' in group_names"
+
+- name: add microk8s_add_node_url to dummy host to pass facts between hosts
+  add_host:
+    name: "DUMMY_HOST"
+    microk8s_add_node_url: "{{ microk8s_add_node_url }}"
+
+- name: Join worker nodes to cluster
+  shell: microk8s.join {{hostvars['DUMMY_HOST']['microk8s_add_node_url']}}
+  when: "'workers' in group_names"
+
+- name: Provide required permissions
+  shell: usermod -a -G microk8s k8sadmin && chown -f -R k8sadmin ~/.kube
+  when: "'masters' in group_names"
+
+- name: Check worker nodes availability on master
+  shell: microk8s.kubectl get node
+  register: check_nodes_stdout
+
+- debug: 
+    msg: "{{check_nodes_stdout.stdout}}"

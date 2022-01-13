@@ -1,0 +1,148 @@
+---
+# tasks file for configure_hosts
+
+
+# Assign worker nodes hostnames
+- name: Assign hostname for worker 01
+  hostname:
+    name: "{{ k8s_worker_01 }}"
+    use: systemd
+  when: inventory_hostname == '192.168.1.87'
+  tags:
+  - worker
+  - ip_address
+
+# - name: Assign hosts
+
+- name: Assign hostname for worker 02
+  hostname:
+    name: "{{ k8s_worker_02 }}"
+  when: inventory_hostname == '192.168.1.67'
+  tags:
+  - worker
+  - ip_address
+
+# Assign API Master Server Hostname
+- name: Assign hostname for K8's Master
+  hostname:
+    name: "{{ k8s_master_01 }}"
+  when: inventory_hostname == '192.168.1.77'
+  tags:
+  - master
+  - ip_address
+
+# Assign Load Balancer Hostname
+# - name: Assign hostname for Load Balancer
+#   hostname:
+#     name: "{{ k8s_balancer_01 }}"
+#   when: inventory_hostname == '192.168.50.117'
+#   tags:
+#   - load
+#   - ip_address
+
+
+# Assign NFS/TFTP Server Hostname
+# - name: Assign hostname for management
+#   hostname:
+#     name: "{{ management_01 }}"
+#   when: inventory_hostname == '192.168.1.67'
+#   tags:
+#   - management
+#   - ip_address
+
+# # Backup old remote hosts
+# - name: Move hosts to hosts.bak
+#   command: mv /etc/hosts /etc/hosts.bak
+
+# Copy /etc/hosts file
+- name: Copy /etc/hosts for worker 02
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+  vars:
+    hostname: "{{ k8s_worker_02 }}" 
+  when: inventory_hostname == '192.168.1.67'
+  tags:
+  - hosts
+- name: Copy /etc/hosts for master
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+  vars:
+    hostname: "{{ k8s_master_01 }}" 
+  when: inventory_hostname == '192.168.1.77'
+  tags:
+  - hosts
+- name: Copy /etc/hosts for worker 01
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+  vars:
+    hostname: "{{ k8s_worker_01 }}" 
+  when: inventory_hostname == '192.168.1.87'
+  tags:
+  - hosts
+
+# Change the root password
+# - name: Change the root password
+#   user:
+#     name: root
+#     update_password: always
+#     password: "{{ root_password }}"
+#   tags:
+#     - manage_users
+
+# Create Kubernetes Admin
+- name: Add k8sadmin to cluster
+  user:
+    name: "{{ kubernetes_admin }}"
+    comment: Kubernetes Admin
+    shell: /bin/bash
+    password: "{{ k8s_admin_password}}"
+    groups: sudo
+    append: yes
+    create_home: yes
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+  tags:
+    - manage_users
+
+# Lock the default ubuntu account
+- name: Lock the default ubuntu account
+  user:
+    name: ubuntu
+    password_lock: yes
+  tags:
+    - manage_users
+
+# Change the login banner
+- name: Change the login banner
+  template:
+    src: issue.j2
+    dest: /etc/issue
+  tags:
+    - banner
+
+# Change SSH login banner path
+- name: Change Banner option in /etc/ssh/sshd_config
+  replace:
+    path: /etc/ssh/sshd_config
+    regexp: '#Banner none'
+    replace: 'Banner /etc/issue'
+  tags:
+    - banner
+
+# Restart sshd service
+- name: Restsart sshd service
+  service:
+    name: sshd
+    state: restarted
+  tags:
+    - banner
+
+- name: Install snap
+  apt:
+    name: snapd
+    state: present
+    

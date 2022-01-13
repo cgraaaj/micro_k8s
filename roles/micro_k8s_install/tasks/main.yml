@@ -1,0 +1,19 @@
+---
+# tasks file for micro_k8s_install
+- name: Test for cgroup 
+  shell: grep -c "cgroup_enable=memory cgroup_memory=1" /boot/firmware/cmdline.txt || true
+  register: test_cgroup
+
+- name: add cgroup to cmdline.txt
+  lineinfile:
+    dest: /boot/firmware/cmdline.txt
+    line: cgroup_enable=memory cgroup_memory=1
+  when: test_cgroup.stdout == "0"
+
+- name: calling reboot task
+  include_role:
+    name: reboot
+  when: test_cgroup.stdout == "0"
+
+- name: Install microk8s 
+  command: snap install microk8s --classic

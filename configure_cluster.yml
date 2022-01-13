@@ -1,0 +1,14 @@
+---
+
+# Playbook that calls the created roles
+# nginx_load_balancer only runs on the inventory_hostname of the load balancer host
+# certificates only runs on the node you choose to be the CA and distribute certs from
+
+- name: call roles
+  hosts: all
+  become: true
+  roles:
+    # - { role: configure_hosts }
+    # - { role: micro_k8s_install }
+    - { role: configure_micro_k8s }
+    # - { role: reboot }

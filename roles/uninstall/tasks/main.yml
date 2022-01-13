@@ -1,0 +1,35 @@
+---
+# tasks file for uninstall
+- name: Remove existing gpg keys and repos to prevent issues
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items:
+    - { path: /etc/apt/sources.list.d/kubernetes.list }
+    - { path: /usr/share/keyrings/kubernetes-archive-keyring.gpg }
+    - { path: /etc/apt/sources.list.d/docker.list }
+    - { path: /usr/share/keyrings/docker-archive-keyring.gpg }
+
+- name: UnInstall firewalld and ( netfilter-persistent Debian only )
+  apt:
+    pkg: 
+      - firewalld
+      - netfilter-persistent
+    state: absent
+  tags:
+    - firewalld
+    - iptables
+
+- name: UnInstall required software to setup containerd install repo
+  apt:
+    pkg:
+    - bridge-utils
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg
+    - lsb-release
+    - kubeadm
+    - kubectl
+    - kubelet
+    state: absent
