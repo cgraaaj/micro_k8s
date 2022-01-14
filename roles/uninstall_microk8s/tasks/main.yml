@@ -1,0 +1,11 @@
+---
+# tasks file for uninstall_microk8s
+- name: UnInstall microk8s
+  command: snap remove microk8s
+  # when: "'workers' in group_names"
+  register: uninstall
+
+- name: Restart if changed
+  include_role:
+    name: reboot
+  when: uninstall is changed

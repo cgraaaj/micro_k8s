@@ -1,27 +1,48 @@
 ---
 # tasks file for configure_micro_k8s
-- name: Get master node join url
-  shell: sudo microk8s.add-node
-  register: microk8s_add_node_sout
-
-- name: Set master node url/token
-  set_fact:
-    microk8s_add_node_url: "{{ microk8s_add_node_sout.stdout | regex_search('192.*')}}"
+- name: Get master node join url1
+  shell: microk8s.add-node
+  register: microk8s_add_node_sout1
   when: "'masters' in group_names"
 
-- name: Output microk8s_add_node_url variable
+- name: Get master node join url2
+  shell: microk8s.add-node
+  register: microk8s_add_node_sout2
+  when: "'masters' in group_names"
+
+- name: Set master node url/token1
+  set_fact:
+    microk8s_add_node_url1: "{{ microk8s_add_node_sout1.stdout | regex_search('192.*')}}"
+  when: "'masters' in group_names"
+
+- name: Set master node url/token2
+  set_fact:
+    microk8s_add_node_url2: "{{ microk8s_add_node_sout2.stdout | regex_search('192.*')}}"
+  when: "'masters' in group_names"
+
+- name: Output microk8s_add_node_url1 variable
   debug:
-    var: microk8s_add_node_url
+    var: microk8s_add_node_url1
+  when: "'masters' in group_names"
+
+- name: Output microk8s_add_node_url2 variable
+  debug:
+    var: microk8s_add_node_url2 
   when: "'masters' in group_names"
 
 - name: add microk8s_add_node_url to dummy host to pass facts between hosts
   add_host:
     name: "DUMMY_HOST"
-    microk8s_add_node_url: "{{ microk8s_add_node_url }}"
+    microk8s_add_node_url1: "{{ microk8s_add_node_url1 }}"
+    microk8s_add_node_url2: "{{ microk8s_add_node_url2 }}"
 
-- name: Join worker nodes to cluster
-  shell: microk8s.join {{hostvars['DUMMY_HOST']['microk8s_add_node_url']}}
-  when: "'workers' in group_names"
+- name: Join worker 01 nodes to cluster
+  shell: microk8s.join {{hostvars['DUMMY_HOST']['microk8s_add_node_url1']}}
+  when: inventory_hostname == groups['workers'][0]
+
+- name: Join worker 02 nodes to cluster
+  shell: microk8s.join {{hostvars['DUMMY_HOST']['microk8s_add_node_url2']}}
+  when: inventory_hostname == groups['workers'][1]
 
 - name: Provide required permissions
   shell: usermod -a -G microk8s k8sadmin && chown -f -R k8sadmin ~/.kube
@@ -30,6 +51,7 @@
 - name: Check worker nodes availability on master
   shell: microk8s.kubectl get node
   register: check_nodes_stdout
+  when: "'masters' in group_names"
 
 - debug: 
     msg: "{{check_nodes_stdout.stdout}}"

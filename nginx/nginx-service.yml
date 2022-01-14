@@ -6,7 +6,7 @@ metadata:
       app: webserver
       type: front-end
 spec:
-  type: NodePort
+    type: NodePort
     ports:
       - targetPort: 80
         port: 80
