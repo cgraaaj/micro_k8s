@@ -14,5 +14,5 @@ spec:
             name: nginx
             port: 
               number: 80
-        path: /nginx
+        path: /
         pathType: Prefix
