@@ -11,5 +11,5 @@
     # - { role: uninstall_microk8s }
     # - { role: configure_hosts }
     # - { role: micro_k8s_install }
-    - { role: configure_micro_k8s }
-    # - { role: reboot }
+    # - { role: configure_micro_k8s }
+    - { role: reboot }

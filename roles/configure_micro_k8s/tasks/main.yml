@@ -55,3 +55,4 @@
 
 - debug: 
     msg: "{{check_nodes_stdout.stdout}}"
+  when: "'masters' in group_names"
