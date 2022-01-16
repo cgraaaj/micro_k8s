@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx
+  name: nginx-deploy-resume
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: nginx-resume
+  template:
+    metadata:
+      labels:
+        run: nginx-resume
+    spec:
+      volumes:
+      - name: resume-volume
+        persistentVolumeClaim:
+          claimName: resume-pvc
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: resume-volume
+          mountPath: "/usr/share/nginx/html"
