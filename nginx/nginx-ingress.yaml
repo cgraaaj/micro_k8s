@@ -7,12 +7,13 @@ metadata:
     kubernetes.io/ingress.class: public
 spec:
   rules:
-  - http:
+  - host: cgrpi.ml
+    http:
       paths:
-      - backend:
+      - path: /
+        pathType: Exact
+        backend:
           service:
             name: nginx
             port: 
               number: 80
-        path: /
-        pathType: Prefix
