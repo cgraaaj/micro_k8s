@@ -16,20 +16,36 @@ spec:
     spec:
       serviceAccountName: nfs-client-provisioner
       containers:
-        - name: nfs-client-provisioner
+        - name: nfs-client-provisioner-k8sdata
           image: quay.io/external_storage/nfs-client-provisioner-arm:latest
           volumeMounts:
-            - name: nfs-client-root
+            - name: nfs-k8sdata
               mountPath: /persistentvolumes
           env:
             - name: PROVISIONER_NAME
-              value: dynamic-nfs
+              value: dynamic-nfs-k8sdata
             - name: NFS_SERVER
               value: 192.168.1.67
             - name: NFS_PATH
-              value: /media/480_ssd/data/k8sdata
+              value: /media/480_ssd/k8sdata
+        - name: nfs-client-provisioner-nextcloud
+          image: quay.io/external_storage/nfs-client-provisioner-arm:latest
+          volumeMounts:
+            - name: nfs-nextcloud
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: dynamic-nfs-nextcloud
+            - name: NFS_SERVER
+              value: 192.168.1.67
+            - name: NFS_PATH
+              value: /media/480_ssd/nextcloud
       volumes:
-        - name: nfs-client-root
+        - name: nfs-k8sdata
           nfs:
             server: 192.168.1.67
-            path: /media/480_ssd/data/k8sdata
+            path: /media/480_ssd/k8sdata
+        - name: nfs-nextcloud
+          nfs:
+            server: 192.168.1.67
+            path: /media/480_ssd/nextcloud

@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: resume-app
   labels:
     run: nginx
   name: nginx-deploy-resume
@@ -9,10 +10,12 @@ spec:
   selector:
     matchLabels:
       run: nginx-resume
+      pod-label: nginx-resume-pod
   template:
     metadata:
       labels:
         run: nginx-resume
+        pod-label: nginx-resume-pod
     spec:
       volumes:
       - name: resume-volume
@@ -24,3 +27,17 @@ spec:
         volumeMounts:
         - name: resume-volume
           mountPath: "/usr/share/nginx/html"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resume-svc
+  namespace: resume-app
+  labels:
+    app: nginx
+spec:
+  selector:
+    pod-label: nginx-resume-pod
+  ports:
+  - protocol: TCP
+    port: 80

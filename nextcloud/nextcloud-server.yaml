@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-server
+  namespace: nextcloud
+  labels:
+    app: nextcloud
+  # annotations:
+  #   nginx.org/client-max-body-size: "512m"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod-label: nextcloud-server-pod
+  template:
+    metadata:
+      labels:
+        pod-label: nextcloud-server-pod
+    spec:
+      containers:
+      - name: nextcloud
+        image: nextcloud
+        volumeMounts:
+        - name: nextcloud-config
+          mountPath: /usr/local/etc/php/conf.d/nextcloud.ini
+          subPath: nextcloud.ini
+        - name: server-data 
+          mountPath: /var/www/html
+          subPath: app-data
+        - name: media-data 
+          mountPath: /var/www/html/data
+      volumes:
+      - name: nextcloud-config
+        configMap: 
+          name: nextcloud-configmap
+          items: 
+          - key: nextcloud-custom.ini
+            path:  nextcloud.ini
+      - name: server-data
+        persistentVolumeClaim:
+          claimName: nextcloud-shared-pvc
+      - name: media-data
+        persistentVolumeClaim:
+          claimName: nextcloud-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nextcloud-server
+  namespace: nextcloud
+  labels:
+    app: nextcloud
+spec:
+  type: ClusterIP
+  selector:
+    pod-label: nextcloud-server-pod
+  ports:
+  - protocol: TCP
+    port: 80

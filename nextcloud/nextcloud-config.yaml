@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextcloud-configmap
+  namespace: nextcloud
+data:
+  nextcloud-custom.ini: |
+    upload_max_filesize=16G
+    post_max_size=16G
+    memory_limit=1G
