@@ -40,6 +40,18 @@ spec:
               value: 192.168.1.67
             - name: NFS_PATH
               value: /media/480_ssd/nextcloud
+        - name: nfs-client-provisioner-media
+          image: quay.io/external_storage/nfs-client-provisioner-arm:latest
+          volumeMounts:
+            - name: nfs-media
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: dynamic-nfs-media
+            - name: NFS_SERVER
+              value: 192.168.1.67
+            - name: NFS_PATH
+              value: /media/480_ssd/media
       volumes:
         - name: nfs-k8sdata
           nfs:
@@ -49,3 +61,7 @@ spec:
           nfs:
             server: 192.168.1.67
             path: /media/480_ssd/nextcloud
+        - name: nfs-media
+          nfs:
+            server: 192.168.1.67
+            path: /media/480_ssd/media
