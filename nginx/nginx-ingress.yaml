@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nginx-ingress
-  namespace: net-test
+  namespace: pi-dashboard
   annotations:
     kubernetes.io/ingress.class: public
 spec:
@@ -11,9 +11,9 @@ spec:
     http:
       paths:
       - path: /
-        pathType: Exact
+        pathType: Prefix
         backend:
           service:
-            name: nginx
+            name: nginx-dashboard
             port: 
               number: 80

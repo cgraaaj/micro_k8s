@@ -1,0 +1,2 @@
+
+# kubectl get service kubernetes-dashboard -n kube-system -o yaml
