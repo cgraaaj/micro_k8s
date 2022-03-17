@@ -25,7 +25,7 @@ spec:
             - name: PROVISIONER_NAME
               value: dynamic-nfs-k8sdata
             - name: NFS_SERVER
-              value: 192.168.1.67
+              value: 192.168.1.77
             - name: NFS_PATH
               value: /media/480_ssd/k8sdata
         - name: nfs-client-provisioner-nextcloud
@@ -37,7 +37,7 @@ spec:
             - name: PROVISIONER_NAME
               value: dynamic-nfs-nextcloud
             - name: NFS_SERVER
-              value: 192.168.1.67
+              value: 192.168.1.77
             - name: NFS_PATH
               value: /media/480_ssd/nextcloud
         - name: nfs-client-provisioner-media
@@ -49,19 +49,19 @@ spec:
             - name: PROVISIONER_NAME
               value: dynamic-nfs-media
             - name: NFS_SERVER
-              value: 192.168.1.67
+              value: 192.168.1.77
             - name: NFS_PATH
               value: /media/480_ssd/media
       volumes:
         - name: nfs-k8sdata
           nfs:
-            server: 192.168.1.67
+            server: 192.168.1.77
             path: /media/480_ssd/k8sdata
         - name: nfs-nextcloud
           nfs:
-            server: 192.168.1.67
+            server: 192.168.1.77
             path: /media/480_ssd/nextcloud
         - name: nfs-media
           nfs:
-            server: 192.168.1.67
+            server: 192.168.1.77
             path: /media/480_ssd/media
