@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: stock-analyzer
+  name: stock-analyzer-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: stock-analyzer
+      tier: frontend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: stock-analyzer
+        tier: frontend
+        track: stable
+    spec:
+      containers:
+        - name: frontend
+          image: raju6713/sa_frontend:aarch64
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: stock-analyzer
+  name: sa-frontend-svc
+spec:
+  selector:
+    app: stock-analyzer
+    tier: frontend
+  ports:
+  - protocol: TCP
+    port: 3000

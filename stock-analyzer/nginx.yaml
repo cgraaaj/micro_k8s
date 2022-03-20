@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stock-analyzer-nginx-conf
+  namespace: stock-analyzer
+data:
+  default.conf: |
+    upstream frontend{
+      server sa-frontend-svc:3000;
+    }
+
+    upstream backend{
+      server sa-backend-svc:5000;
+    }
+
+    upstream websocket{
+      server sa-websocket-svc:3213; 
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://frontend;
+        }
+
+        location /api {
+            rewrite /api/(.*) /$1 break;
+            proxy_pass http://backend;
+            proxy_connect_timeout   120;
+            proxy_send_timeout      120;
+            proxy_read_timeout      120;
+            send_timeout            120;
+            client_body_timeout     120;
+        }
+
+        location /ws {
+                proxy_pass http://websocket;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "Upgrade";
+        }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-analyzer-nginx
+  namespace: stock-analyzer
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: nginx-conf
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+            # readOnly: true
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: stock-analyzer-nginx-conf
+          items:
+            - key: default.conf
+              path: default.conf
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sa-nginx-svc
+  namespace: stock-analyzer
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    app: nginx 

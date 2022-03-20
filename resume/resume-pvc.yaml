@@ -6,7 +6,7 @@ metadata:
 spec:
   storageClassName: nfs-storage-k8sdata
   accessModes:
-    - ReadWriteMany
+    - ReadOnlyMany
   resources:
     requests:
       storage: 250Mi
