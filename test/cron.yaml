@@ -4,17 +4,13 @@ metadata:
   name: hello
   namespace: test
 spec:
-  schedule: "* * * * *"
+  schedule: "0 */2 * * *"
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - name: hello
-            image: busybox
-            imagePullPolicy: IfNotPresent
-            command:
-            - /bin/sh
-            - -c
-            - date; echo Hello from the Kubernetes cluster
+          - name: trend-analysis
+            image: raju6713/sa_trend_analysis:aarch64
+            imagePullPolicy: Always
           restartPolicy: OnFailure

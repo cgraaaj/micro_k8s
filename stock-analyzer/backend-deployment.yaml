@@ -4,7 +4,7 @@ metadata:
   namespace: stock-analyzer
   name: stock-analyzer-backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: stock-analyzer
