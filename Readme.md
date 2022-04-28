@@ -14,3 +14,13 @@ for nextcloud
 made changes in /var/www/html/.user.ini for the php upload size (make config map for this)
 
 claim-DtLNP61aG7P72K--EK-t
+
+
+install ansible for ubuntu
+edit the config file as show in https://www.youtube.com/watch?v=sDSuAPoM5iQ
+give the passvault path
+
+to run the ansible
+sudo ansible-playbook -i hosts.yml configure_cluster.yml -u k8sadmin -Kk 
+to test the servers
+ansible all -i hosts.yml -m ping -u k8sadmin -Kk
