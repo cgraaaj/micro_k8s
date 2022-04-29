@@ -3,7 +3,7 @@
 - name: Unconditionally reboot the machine with all defaults
   reboot:
   
-- name: Sleep for 30 sec after boot up
+- name: Sleep for 60 sec after boot up
   wait_for:
-    timeout: 30
+    timeout: 60
   delegate_to: localhost
