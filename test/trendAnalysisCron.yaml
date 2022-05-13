@@ -4,7 +4,7 @@ metadata:
   name: hello
   namespace: test
 spec:
-  schedule: "0 */2 * * *"
+  schedule: "30 4 * * 1-5"
   jobTemplate:
     spec:
       template:
@@ -12,5 +12,8 @@ spec:
           containers:
           - name: trend-analysis
             image: raju6713/sa_trend_analysis:aarch64
+            env: 
+            - name: PYTHONUNBUFFERED
+              value: "1"
             imagePullPolicy: Always
           restartPolicy: OnFailure
