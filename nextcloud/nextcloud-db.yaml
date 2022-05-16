@@ -12,6 +12,8 @@ spec:
       pod-label: nextcloud-db-pod
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         pod-label: nextcloud-db-pod
     spec:

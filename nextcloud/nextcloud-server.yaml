@@ -14,12 +14,14 @@ spec:
       pod-label: nextcloud-server-pod
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         pod-label: nextcloud-server-pod
     spec:
       containers:
       - name: nextcloud
-        image: nextcloud
+        image: nextcloud:23.0.4
         volumeMounts:
         - name: nextcloud-config
           mountPath: /usr/local/etc/php/conf.d/nextcloud.ini

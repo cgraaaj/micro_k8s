@@ -13,6 +13,8 @@ spec:
       pod-label: nginx-resume-pod
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         run: nginx-resume
         pod-label: nginx-resume-pod
