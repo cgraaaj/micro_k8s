@@ -1,0 +1,8 @@
+---
+# defaults file for fan_control
+gpio_pins:
+  - 4
+  - 6
+fan_control_frequency: 25  # Frequency in Hz
+duty_cycle_off: 0          # Fan off (0% duty cycle)
+temp_threshold: 60         # Temperature threshold in °C to turn on fan

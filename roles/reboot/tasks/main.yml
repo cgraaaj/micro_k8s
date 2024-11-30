@@ -1,9 +1,10 @@
 ---
 # tasks file for reboot
-- name: Unconditionally reboot the machine with all defaults
+- name: Unconditionally reboot the machine with 3 min timeout
   reboot:
-  
-- name: Sleep for 60 sec after boot up
-  wait_for:
-    timeout: 60
-  delegate_to: localhost
+    reboot_timeout: 180
+
+# - name: Sleep for 3 min after boot up
+#   wait_for:
+#     timeout: 180
+#   delegate_to: localhost

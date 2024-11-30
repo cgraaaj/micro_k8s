@@ -1,0 +1,6 @@
+---
+# handlers file for fan_control
+- name: Restart fan control service
+  ansible.builtin.systemd:
+    name: fan_control
+    state: restarted

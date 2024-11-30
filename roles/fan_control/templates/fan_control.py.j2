@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+
+import RPi.GPIO as GPIO
+import time
+import argparse
+import os
+
+# GPIO pin settings
+FAN_PINS = {{ gpio_pins }}
+FREQUENCY = {{ fan_control_frequency }}
+DUTY_CYCLE_OFF = {{ duty_cycle_off }}
+DUTY_CYCLE_ON = 100  # Fan fully on
+
+# Temperature threshold (default 60°C)
+TEMP_THRESHOLD = 60
+
+# PWM Dictionary to manage multiple fans
+pwm_dict = {}
+
+# Global flag for force-off mode
+force_off = False
+
+def setup_pins():
+    """Initialize GPIO pins and set up PWM control for fans."""
+    GPIO.setmode(GPIO.BCM)
+    for pin in FAN_PINS:
+        GPIO.setup(pin, GPIO.OUT)
+        pwm = GPIO.PWM(pin, FREQUENCY)
+        pwm.start(DUTY_CYCLE_OFF)  # Start with the fan off
+        pwm_dict[pin] = pwm
+
+def turn_on_fan():
+    """Turn on the fan by setting duty cycle to 100%."""
+    global force_off
+    if force_off:
+        print("Fan is forced off. Ignoring turn-on request.")
+        return
+    print("Turning on the fan...")
+    for pwm in pwm_dict.values():
+        pwm.ChangeDutyCycle(DUTY_CYCLE_ON)
+
+def turn_off_fan():
+    """Turn off the fan by setting duty cycle to 0%."""
+    global force_off
+    print("Turning off the fan...")
+    for pwm in pwm_dict.values():
+        pwm.ChangeDutyCycle(DUTY_CYCLE_OFF)
+
+def get_cpu_temperature():
+    """Read the CPU temperature from the system."""
+    try:
+        with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+            temp = int(f.read()) / 1000.0  # Convert millidegrees to degrees
+        return temp
+    except FileNotFoundError:
+        print("Error: Unable to read CPU temperature.")
+        return 0
+
+def monitor_temperature():
+    """Continuously monitor CPU temperature and control the fan."""
+    global force_off
+    try:
+        print("Monitoring CPU temperature...")
+        while True:
+            if not force_off:  # Only monitor if force-off is not active
+                cpu_temp = get_cpu_temperature()
+                print(f"Current CPU temperature: {cpu_temp}°C")
+                
+                if cpu_temp >= TEMP_THRESHOLD:
+                    turn_on_fan()
+                else:
+                    turn_off_fan()
+            else:
+                print("Fan is in force-off mode. Skipping temperature check.")
+            
+            time.sleep(5)  # Check temperature every 5 seconds
+    except KeyboardInterrupt:
+        print("Exiting temperature monitoring...")
+        cleanup()
+
+def cleanup():
+    """Clean up GPIO and turn off the fan before exiting."""
+    print("Cleaning up GPIO and turning off the fan...")
+    turn_off_fan()
+    GPIO.cleanup()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Fan Control Script")
+    parser.add_argument("--on", action="store_true", help="Turn on the fan")
+    parser.add_argument("--off", action="store_true", help="Turn off the fan")
+    parser.add_argument("--monitor", action="store_true", help="Monitor CPU temperature and control the fan automatically")
+    parser.add_argument("--force-off", action="store_true", help="Force the fan off regardless of temperature")
+
+    args = parser.parse_args()
+
+    setup_pins()
+
+    try:
+        if args.on:
+            force_off = False  # Disable force-off if turning on manually
+            turn_on_fan()
+        elif args.off:
+            force_off = True  # Enable force-off mode
+            turn_off_fan()
+        elif args.monitor:
+            monitor_temperature()
+        elif args.force_off:
+            force_off = True  # Enable force-off mode
+            turn_off_fan()
+            print("Fan is now in force-off mode. It won't turn on automatically.")
+        else:
+            print("No action specified. Use --on, --off, --monitor, or --force-off.")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        cleanup()

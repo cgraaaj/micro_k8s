@@ -1,0 +1,19 @@
+---
+# tasks file for utilities
+- name: Show temp
+  shell: vcgencmd measure_temp
+  register: temp
+  when: "'rpis' in group_names"
+
+- debug: 
+    msg: "{{temp.stdout}}"
+  when: "'rpis' in group_names"
+
+- name: Check super senior temp
+  shell: sensors
+  register: ss_temp
+  when: "'supersenior' in group_names"
+
+- debug: 
+    msg: "{{ss_temp.stdout.split('\n')}}"
+  when: "'supersenior' in group_names"

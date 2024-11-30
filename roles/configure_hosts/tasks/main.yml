@@ -7,26 +7,42 @@
   hostname:
     name: "{{ k8s_worker_01 }}"
     use: systemd
-  when: inventory_hostname == '192.168.1.87'
+  when: inventory_hostname == '192.168.1.69'
   tags:
   - worker
   - ip_address
 
 # - name: Assign hosts
-
 - name: Assign hostname for worker 02
   hostname:
     name: "{{ k8s_worker_02 }}"
-  when: inventory_hostname == '192.168.1.67'
+  when: inventory_hostname == '192.168.1.70'
+  tags:
+  - worker
+  - ip_address
+
+# - name: Assign hosts
+- name: Assign hostname for worker 03
+  hostname:
+    name: "{{ k8s_worker_03 }}"
+  when: inventory_hostname == '192.168.1.71'
   tags:
   - worker
   - ip_address
 
 # Assign API Master Server Hostname
-- name: Assign hostname for K8's Master
+- name: Assign hostname for K8's Master 01
   hostname:
     name: "{{ k8s_master_01 }}"
-  when: inventory_hostname == '192.168.1.77'
+  when: inventory_hostname == '192.168.1.67'
+  tags:
+  - master
+  - ip_address
+
+- name: Assign hostname for K8's Master 02
+  hostname:
+    name: "{{ k8s_master_02 }}"
+  when: inventory_hostname == '192.168.1.68'
   tags:
   - master
   - ip_address
@@ -84,21 +100,21 @@
   - hosts
 
 # Change the root password
-# - name: Change the root password
-#   user:
-#     name: root
-#     update_password: always
-#     password: "{{ root_password }}"
-#   tags:
-#     - manage_users
+- name: Change the root password
+  user:
+    name: root
+    update_password: always
+    password: "{{ root_password }}"
+  tags:
+    - manage_users
 
 # Create Kubernetes Admin
-- name: Add k8sadmin to cluster
+- name: Add k3sadmin to cluster
   user:
     name: "{{ kubernetes_admin }}"
     comment: Kubernetes Admin
     shell: /bin/bash
-    password: "{{ k8s_admin_password}}"
+    password: "{{ k3s_admin_password }}"
     groups: sudo
     append: yes
     create_home: yes
@@ -107,6 +123,17 @@
     ssh_key_file: .ssh/id_rsa
   tags:
     - manage_users
+    - create_user
+
+# Delete Kubernetes Admin
+- name: Delete k3sadmin from cluster
+  user:
+    name: k3sadmin
+    state: absent
+    remove: yes
+  tags:
+    - manage_users
+    - delete_user
 
 # Lock the default ubuntu account
 - name: Lock the default ubuntu account
@@ -117,21 +144,21 @@
     - manage_users
 
 # Change the login banner
-- name: Change the login banner
-  template:
-    src: issue.j2
-    dest: /etc/issue
-  tags:
-    - banner
+# - name: Change the login banner
+#   template:
+#     src: issue.j2
+#     dest: /etc/issue
+#   tags:
+#     - banner
 
 # Change SSH login banner path
-- name: Change Banner option in /etc/ssh/sshd_config
-  replace:
-    path: /etc/ssh/sshd_config
-    regexp: '#Banner none'
-    replace: 'Banner /etc/issue'
-  tags:
-    - banner
+# - name: Change Banner option in /etc/ssh/sshd_config
+#   replace:
+#     path: /etc/ssh/sshd_config
+#     regexp: '#Banner none'
+#     replace: 'Banner /etc/issue'
+#   tags:
+#     - banner
 
 # Restart sshd service
 - name: Restsart sshd service
